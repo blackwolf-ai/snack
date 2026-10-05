@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local config and secrets. Never commit a real bot token.
+.env
+*.env
+!.env.example
+snack.yaml
+*.log
+
+# OS / editor
+.DS_Store

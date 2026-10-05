@@ -1,0 +1,70 @@
+# snack agent config. Copy to snack.yaml and edit.
+# Only install this on machines you own or administer, with the owner's consent.
+#
+# Secrets: leave telegram.token empty and set TELEGRAM_BOT_TOKEN instead,
+# and/or set SNACK_ALLOWED_CHAT_IDS. Environment variables override this file.
+# Never commit snack.yaml or a real token.
+
+telegram:
+  token: ""
+  # Private chat or group IDs that may issue commands. Everyone else is rejected.
+  allowed_chat_ids: []
+  # Optional. When non-empty, the sender's Telegram @username must also match.
+  # Useful if allowed_chat_ids contains a group: every member of an allowed
+  # group can otherwise run the whitelist.
+  allowed_usernames: []
+
+agent:
+  # null uses the machine hostname. Replies are prefixed with it.
+  hostname: null
+  # How often the background loop samples health and evaluates alerts.
+  sample_interval_seconds: 60
+  disk_path: /
+  log_level: INFO
+  # null logs JSON lines to stdout only. A path also appends to that file.
+  log_file: null
+  # Send "monitoring active" to each allowed chat when the agent starts.
+  notify_on_start: true
+
+alerts:
+  # Minimum seconds between repeat alerts of the same type while it stays over.
+  cooldown_seconds: 900
+  # null disables that alert. Percents alert when the sample is >= the threshold.
+  cpu_percent: 90
+  memory_percent: 85
+  disk_percent: 90
+  # Alert when load average (1 minute) / CPU count is >= this value.
+  load_per_cpu: 2.0
+
+limits:
+  # Telegram messages cap at 4096 characters. Stay under that.
+  output_max_bytes: 3500
+  default_timeout_seconds: 30
+
+# Service control is Linux systemd only. Other platforms get a clear error.
+# The name is what you pass to /start_service. The unit is the systemd unit.
+# snack refuses any name that is not listed. Do not point this at units you
+# do not intend an allowed chat to start, stop, or restart.
+#
+# services:
+#   - name: nginx
+#     unit: nginx.service
+services: []
+
+# Each command is a fixed argv executed directly. There is no shell.
+# The only Telegram input is the command name; it selects this argv as-is.
+# Do not put "bash -c" or "python -c" here — config loading rejects those.
+# Prefer absolute paths for anything that is not a standard system binary.
+commands:
+  - name: disk
+    argv: ["df", "-h"]
+    timeout_seconds: 15
+  - name: uptime
+    argv: ["uptime"]
+    timeout_seconds: 10
+  # - name: nginx_status
+  #   argv: ["systemctl", "status", "nginx", "--no-pager"]
+  #   timeout_seconds: 15
+  # - name: backup_status
+  #   argv: ["/usr/local/sbin/backup-status"]
+  #   timeout_seconds: 60

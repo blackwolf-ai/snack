@@ -1,0 +1,23 @@
+[Unit]
+Description=snack consent-based system monitor
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Dedicated user. Grant it only the systemctl rights the whitelist needs.
+User=snack
+Group=snack
+WorkingDirectory=/var/lib/snack
+EnvironmentFile=/etc/snack/snack.env
+ExecStart=/opt/snack/.venv/bin/snack run --config /etc/snack/snack.yaml
+Restart=on-failure
+RestartSec=10
+# Visible service. Logs stay in the journal:
+#   systemctl status snack
+#   journalctl -u snack -f
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
